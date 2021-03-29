@@ -1,3 +1,4 @@
+from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers
 from rest_framework.utils import json
 from rest_framework.views import APIView
@@ -8,9 +9,9 @@ import datetime
 import bcrypt
 from django.forms.models import model_to_dict
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ProjectSerializer
 from .utils import createJwtToken, hashPassword, comparePassword
-from .models import User, Address, PersonalData
+from .models import User, Address, PersonalData, Project
 from django.core import serializers
 
 
@@ -59,12 +60,14 @@ class UserView(APIView):
         # token = request.data.jwt
         # user = User.objects.filter(id=payload['id']).first()
         user = request.decoded_user
+        # serializer_context = {
+        #     'request': request,
+        # }
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
     def post(self, request):
         user = request.decoded_user
-        # userData = User.objects.get(pk=user.id)
         # tu jest cudo, bo aktualizuje wszystkich z tym ID, ale id jest unikatowe wiec niby spoko
         userHook = User.objects.filter(id=user.id)
         persDataHook = userHook.first().personal_data
@@ -84,13 +87,6 @@ class UserView(APIView):
         if 'password' in request.data:
             userHook.update(password=hashPassword(request.data['password']))
         if 'first_name' in request.data:
-            # if persDataHook is None:
-            #     pers_data = PersonalData(first_name=request.data['first_name'])
-            #     pers_data.save()
-            #     User.objects.filter(id=user.id).update(personal_data=pers_data)
-            # else:
-            #     persDataHook.first_name=request.data['first_name']
-            #     persDataHook.save()
             persDataHook.first_name = request.data['first_name']
         if 'last_name' in request.data:
             persDataHook.last_name = request.data['last_name']
@@ -99,7 +95,7 @@ class UserView(APIView):
         # TODO
         if 'birth_date' in request.data:
             b = request.data['birth_date'].split(".")
-            bd = datetime.datetime(b[2], b[1], b[0])
+            bd = datetime.datetime(int(b[2]), int(b[1]), int(b[0]))
             persDataHook.birth_date = bd
         if 'city' in request.data:
             addrHook.city = request.data['city']
@@ -109,28 +105,48 @@ class UserView(APIView):
             addrHook.country = request.data['country']
         if 'zip_code' in request.data:
             addrHook.zip_code = request.data['zip_code']
-        # userHook.update(updated_at=datetime.now)
-        # userHook.updated_at = datetime.now()
+        userHook.update(updated_at=datetime.datetime.now())
         persDataHook.save()
         addrHook.save()
-
-
-        # print(userData)
-
-        # serializer = UserSerializer(data=user)
-        # serializer.is_valid()
-        # print(serializer.data)
-        # # print(serializer)
-        # serializer.data.name = request.data['name']
-        # # print(serializer)
-        # if serializer.is_valid():
-        #     print('yeah')
-        #     serializer.save()
-        # else:
-        #     print(serializer.errors)
-        return Response("SUCCESS")
-
-
-class UserDataView(APIView):
-    def get(self, request):
         return Response()
+
+
+class ProjectsView(APIView):
+    def get(self, request):
+        projectSet = Project.objects.all()
+        serializer = ProjectSerializer(projectSet, many=True)
+        return Response(serializer.data)
+
+
+class NewProjectView(APIView):
+    def post(self, request):
+        user = request.decoded_user
+        proj = Project(author=user, title=request.data['title'], desc=request.data['desc'])
+        proj.save()
+        return Response()
+
+
+class TakeProjectView(APIView):
+    def post(self, request):
+        user = request.decoded_user
+        project_id = request.data['projId']
+        Project.objects.filter(id=project_id).update(maker=user)
+        return Response()
+
+
+class MyProjectView(APIView):
+    def get(self, request):
+        user = request.decoded_user
+        projList = Project.objects.filter(maker=user.id)
+        serializer = ProjectSerializer(projList, many=True)
+        return Response(serializer.data)
+
+
+class MyAuthorProjectView(APIView):
+    def get(self, request):
+        user = request.decoded_user
+        projList = Project.objects.filter(author=user.id)
+        serializer = ProjectSerializer(projList, many=True)
+        return Response(serializer.data)
+
+

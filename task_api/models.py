@@ -40,7 +40,13 @@ class Address(models.Model):
     def __getitem__(self, key):
         return getattr(self, key)
 
-# class Project(models.Model):
-#     author = models.ForeignKey('User', on_delete=models.DO_NOTHING())
-#     title = models.CharField(max_length=50)
-##      date
+
+class Project(models.Model):
+    author = models.ForeignKey('User', on_delete=models.DO_NOTHING, related_name='auth')
+    maker = models.ForeignKey('User', on_delete=models.DO_NOTHING, related_name='crea', null=True)
+    title = models.CharField(max_length=100)
+    desc = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __getitem__(self, key):
+        return getattr(self, key)
