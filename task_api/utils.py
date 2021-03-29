@@ -1,5 +1,6 @@
 import datetime
 import jwt
+import bcrypt
 
 def createJwtToken(id):
     payload = {
@@ -10,3 +11,10 @@ def createJwtToken(id):
 
     token = jwt.encode(payload, 'secret', algorithm='HS256')
     return token
+
+def hashPassword(password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password, salt)
+
+def comparePassword(password, hashed_password):
+    return bcrypt.checkpw(password, hashed_password)

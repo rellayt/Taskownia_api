@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 import jwt
 import datetime
+
+from .serializers import UserSerializer
 from .utils import createJwtToken
 
 # Create your views here.
@@ -11,8 +13,10 @@ class RegisterView(APIView):
         print(request.data['name'])
         print(request.data['email'])
         print(request.data['password'])
+        # User
         # serializer = UserSerializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
+        # serializer.is_valid(raise_exception=False)
+        # print(serializer)
         # serializer.save()
         # return Response(serializer.data)
         return Response()
