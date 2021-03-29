@@ -1,51 +1,57 @@
+from rest_framework import serializers
+from rest_framework.utils import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
 import jwt
 import datetime
+import bcrypt
+from django.forms.models import model_to_dict
 
 from .serializers import UserSerializer
-from .utils import createJwtToken
+from .utils import createJwtToken, hashPassword, comparePassword
+from .models import User
+from django.core import serializers
+
 
 # Create your views here.
 class RegisterView(APIView):
     def post(self, request):
-        print(request.data['name'])
-        print(request.data['email'])
-        print(request.data['password'])
-        # User
+        hashedPassword = hashPassword(request.data['password'])
+        user = User(name=request.data['name'], email=request.data['email'], password=hashedPassword)
+        user.save()
+        token = createJwtToken(str(user.id))
+        # userJson = serializers.serialize('json', user)
         # serializer = UserSerializer(data=request.data)
         # serializer.is_valid(raise_exception=False)
-        # print(serializer)
         # serializer.save()
         # return Response(serializer.data)
-        return Response()
+        data = model_to_dict(user)
+        return Response({
+            'token': token,
+            'user': data
+        })
+
 
 class LoginView(APIView):
     def post(self, request):
-        # print(request.data['email'])
-        # password = request.data['password']
-        #
-        #
+        email = request.data['email']
+        user = User.objects.filter(email='test@foo.pl').first()
+        # print(user)
+        return Response(model_to_dict(user))
         # if user is None:
         #     raise AuthenticationFailed('User not found')
         #
-        # if not user.check_password(password):
+        # if not comparePassword(request.data['password'], user.password):
         #     raise AuthenticationFailed('Incorrect password!')
-        # user = {
-        #     id: 1
-        # }
-
-        # email = request.data['email']
-        # user = User.objects.filter(email=email).first()
+        #
         # token = createJwtToken(user.id)
-        response = Response()
-        # response.set_cookie(key='jwt', value=token, httponly=True, domain='http://3o5sc.csb.app')
-        response.data = {
-            # 'token': token,
-            'user': request.decoded_user
-        }
-        return response
+        # data = model_to_dict(user)
+        # return Response({
+        #     'token': token,
+        #     'user': data
+        # })
+
 
 class UserView(APIView):
     def get(self, request):
@@ -56,13 +62,3 @@ class UserView(APIView):
         # serializer = UserSerializer(user)
         return Response()
         # return Response(serializer.data)
-
-
-class LogoutView(APIView):
-    def post(self, request):
-        response = Response()
-        response.delete_cookie('jwt')
-        response.data = {
-            'message': 'success'
-        }
-        return response

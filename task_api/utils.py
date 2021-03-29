@@ -13,8 +13,9 @@ def createJwtToken(id):
     return token
 
 def hashPassword(password):
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password, salt)
+    salt = bcrypt.gensalt(12)
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode()
 
 def comparePassword(password, hashed_password):
-    return bcrypt.checkpw(password, hashed_password)
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
