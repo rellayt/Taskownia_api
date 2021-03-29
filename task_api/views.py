@@ -36,21 +36,20 @@ class RegisterView(APIView):
 class LoginView(APIView):
     def post(self, request):
         email = request.data['email']
-        user = User.objects.filter(email='test@foo.pl').first()
-        # print(user)
-        return Response(model_to_dict(user))
-        # if user is None:
-        #     raise AuthenticationFailed('User not found')
-        #
-        # if not comparePassword(request.data['password'], user.password):
-        #     raise AuthenticationFailed('Incorrect password!')
-        #
-        # token = createJwtToken(user.id)
-        # data = model_to_dict(user)
-        # return Response({
-        #     'token': token,
-        #     'user': data
-        # })
+        user = User.objects.filter(email=email).first()
+
+        if user is None:
+            raise AuthenticationFailed('User not found')
+
+        if not comparePassword(request.data['password'], user.password):
+            raise AuthenticationFailed('Incorrect password!')
+
+        token = createJwtToken(str(user.id))
+
+        return Response({
+            'token': token,
+            'user': model_to_dict(user)
+        })
 
 
 class UserView(APIView):

@@ -2,7 +2,6 @@ import uuid
 
 from django.db import models
 
-
 # Create models
 class User(models.Model):
     class Meta:
@@ -11,10 +10,10 @@ class User(models.Model):
     name = models.CharField(max_length=255, unique=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
-    personal_data = models.ForeignKey('PersonalData', on_delete=models.CASCADE, null=True)
-    address = models.ForeignKey('Address', on_delete=models.CASCADE, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # personal_data = models.ForeignKey('PersonalData', on_delete=models.CASCADE, null=True)
+    # address = models.ForeignKey('Address', on_delete=models.CASCADE, null=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
 
 class PersonalData(models.Model):
