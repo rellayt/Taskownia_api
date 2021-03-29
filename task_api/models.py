@@ -8,10 +8,19 @@ class User(models.Model):
     class Meta:
         db_table = 'user'
 
+    class RoleEnum(models.TextChoices):
+        AUTHOR = 'AU'
+        MAKER = 'MA'
+
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     name = models.CharField(max_length=255, unique=True)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
+    role = models.CharField(
+        max_length=2,
+        choices=RoleEnum.choices,
+        default=RoleEnum.AUTHOR
+    )
     personal_data = models.ForeignKey('PersonalData', on_delete=models.CASCADE, null=True)
     address = models.ForeignKey('Address', on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

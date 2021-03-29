@@ -19,7 +19,7 @@ from django.core import serializers
 class RegisterView(APIView):
     def post(self, request):
         hashedPassword = hashPassword(request.data['password'])
-        user = User(name=request.data['name'], email=request.data['email'], password=hashedPassword)
+        user = User(name=request.data['name'], email=request.data['email'], password=hashedPassword, role=request.data['role'])
         user.save()
         token = createJwtToken(str(user.id))
         # userJson = serializers.serialize('json', user)
