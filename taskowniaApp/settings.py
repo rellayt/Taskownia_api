@@ -79,9 +79,9 @@ WSGI_APPLICATION = 'taskowniaApp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'taskowniaDB',
+        'NAME': 'taskownia',
         'USER': 'root',
-        'PASSWORD': 'SqLexample123'
+        'PASSWORD': 'kamil'
     }
 }
 

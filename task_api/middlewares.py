@@ -1,6 +1,8 @@
 import jwt
 from rest_framework.exceptions import AuthenticationFailed
 
+from task_api.models import User
+
 
 class CustomCorsMiddleware:
     def __init__(self, get_response):
@@ -19,6 +21,7 @@ class CustomCorsMiddleware:
 
         return response
 
+
 class JwtDecodeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -32,7 +35,8 @@ class JwtDecodeMiddleware:
 
         if (endpoint != 'login') and (endpoint != 'register'):
             request_headers = getattr(request, '_headers', request.headers)
-            if hasattr(request_headers, 'X-Auth-Token'):
+            # if hasattr(request_headers, 'X-Auth-Token'):
+            if 'X-Auth-Token' in request_headers:
                 token = request_headers['X-Auth-Token']
                 try:
                     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
@@ -40,14 +44,12 @@ class JwtDecodeMiddleware:
                     raise AuthenticationFailed('Unauthenticated!')
 
                 # Tu sobie znajdź usera po id
-                # user = User.objects.filter(id=payload['id']).first()
+                user = User.objects.filter(id=payload['id']).first()
                 # serializer = UserSerializer(user)
-                # if user is None:
-                #     raise AuthenticationFailed('Token is invalid')
+                if user is None:
+                    raise AuthenticationFailed('Token is invalid')
 
                 # A następnie przypisz go do requestu
-                # request.decoded_user = user
+                request.decoded_user = user
             else:
                 raise AuthenticationFailed('No Token')
-
-
